@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot UI</title>
+    <style>
+        #chat-container {
+            width: 300px;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #message-container {
+            height: 300px;
+            overflow-y: scroll;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+        #message-input {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="message-container"></div>
+        <input type="text" id="message-input" placeholder="Type your message...">
+    </div>
+
+    <script>
+        const messageContainer = document.getElementById('message-container');
+        const messageInput = document.getElementById('message-input');
+
+        // Function to add message to chat container
+        function addMessage(message, sender) {
+            const div = document.createElement('div');
+            div.innerHTML = `<strong>${sender}: </strong>${message}`;
+            messageContainer.appendChild(div);
+            messageContainer.scrollTop = messageContainer.scrollHeight; // Scroll to bottom
+        }
+
+        // Function to send message to backend and receive response
+        async function sendMessage(message) {
+            const response = await fetch('/message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message })
+            });
+            const data = await response.json();
+            return data.response;
+        }
+
+        // Event listener for input field
+        messageInput.addEventListener('keypress', async function(event) {
+            if (event.key === 'Enter') {
+                const message = messageInput.value.trim();
+                if (message !== '') {
+                    addMessage(message, 'You');
+                    const response = await sendMessage(message);
+                    addMessage(response, 'Bot');
+                    messageInput.value = '';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
